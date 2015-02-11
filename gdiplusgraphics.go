@@ -665,7 +665,7 @@ func (this *Graphics) DrawString(text string, font *Font, layoutRect *RectF, str
 		nativeBrush))
 }
 
-func (this *Graphics) DrawDriverString(text string, font *Font, brush IBrush, positions *PointF, flags INT, matrix *Matrix) Status {
+func (this *Graphics) DrawDriverString(text string, font *Font, brush IBrush, positions *PointF, flags DriverStringOptions, matrix *Matrix) Status {
 	var nativeFont *GpFont
 	if font != nil {
 		nativeFont = font.nativeFont

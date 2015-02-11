@@ -4285,8 +4285,8 @@ func GdipDrawString(graphics *GpGraphics, text string, font *GpFont, layoutRect 
 	return gdiplusSyscall(procGdipDrawString, uintptr(unsafe.Pointer(graphics)), straddr, uintptr(strlen), uintptr(unsafe.Pointer(font)), uintptr(unsafe.Pointer(layoutRect)), uintptr(unsafe.Pointer(format)), uintptr(unsafe.Pointer(brush)))
 }
 
-func GdipDrawDriverString(graphics *GpGraphics, text string, font *GpFont, brush *GpBrush, positions *PointF, flags INT, matrix *GpMatrix) (status Status, err error) {
-	straddr := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(text))) //uintptr(unsafe.Pointer(&wchar[0]))
+func GdipDrawDriverString(graphics *GpGraphics, text string, font *GpFont, brush *GpBrush, positions *PointF, flags DriverStringOptions, matrix *GpMatrix) (status Status, err error) {
+	straddr := uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(text)))
 	strlen := INT(-1)
 	return gdiplusSyscall(procGdipDrawDriverString, uintptr(unsafe.Pointer(graphics)), straddr, uintptr(strlen), uintptr(unsafe.Pointer(font)), uintptr(unsafe.Pointer(brush)), uintptr(unsafe.Pointer(positions)), uintptr(flags), uintptr(unsafe.Pointer(matrix)))
 }

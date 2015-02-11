@@ -46,6 +46,7 @@ func startupGdiplus() {
 	fmt.Println("Startup.err:", err)
 }
 
+////appn = NewApplication(hwnd, backBuffer)
 func graphics_example(hwnd HANDLE) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -105,7 +106,7 @@ func graphics_example(hwnd HANDLE) {
 	fmt.Println("gpath.AddRectangle.status:", gpath.LastResult)
 	fmt.Println("gpath.AddRectangle.err:", gpath.LastError)
 
-	family, _ := NewFontFamily("Courier New", nil)
+	family, _ := NewFontFamily("宋体", nil) //"Courier New"
 	defer family.Close()
 	gpath.AddString("测试", family, FontStyleBold|FontStyleItalic, 80, &RectF{25, 25, 0.0, 0.0}, nil)
 	fmt.Println("gpath.AddString.status:", gpath.LastResult)
@@ -123,7 +124,17 @@ func graphics_example(hwnd HANDLE) {
 	fmt.Println("NewFont.status:", font.LastResult)
 	fmt.Println("NewFont.err:", font.LastError)
 	defer font.Close()
-	graphics.DrawString("测试", font, &RectF{10, 150, 0, 0}, nil, brush)
+
+	rect := &RectF{10, 150, 0, 0}
+	rect, codepointsFitted, linesFilled, _ := graphics.MeasureString("测试", font, rect, nil)
+	fmt.Println("MeasureString.status:", graphics.LastResult)
+	fmt.Println("MeasureString.err:", graphics.LastError)
+	fmt.Println("MeasureString.linesFilled:", linesFilled)
+	fmt.Println("MeasureString.codepointsFitted:", codepointsFitted)
+	fmt.Println("MeasureString.rect:", rect)
+
+	graphics.DrawRectangle2(pen, rect)
+	graphics.DrawString("测试", font, rect, nil, brush)
 	fmt.Println("DrawString.status:", graphics.LastResult)
 	fmt.Println("DrawString.err:", graphics.LastError)
 
@@ -138,20 +149,26 @@ func graphics_example(hwnd HANDLE) {
 	fmt.Println("DrawImageI4.status:", graphics.LastResult)
 	fmt.Println("DrawImageI4.err:", graphics.LastError)
 
+	graphics.DrawDriverString("测试TEST223", font, brush, &PointF{150, 150}, DriverStringOptionsRealizedAdvance|DriverStringOptionsVertical|DriverStringOptionsCmapLookup|DriverStringOptionsCompensateResolution, nil)
+	fmt.Println("DrawDriverString.status:", graphics.LastResult)
+	fmt.Println("DrawDriverString.err:", graphics.LastError)
+
 	BitBlt(hostDC, 0, 0, Width, Height, bufferDC, 0, 0, SRCCOPY)
+}
+
+func WndProc_(hwnd HANDLE, msg uint32, wparam, lparam uintptr) (rc uintptr) {
+	rc = DefWindowProc(hwnd, msg, wparam, lparam)
+	return
 }
 
 // WinProc called by windows to notify us of all windows events we might be interested in.
 func WndProc(hwnd HANDLE, msg uint32, wparam, lparam uintptr) (rc uintptr) {
 	switch msg {
 	case WM_CREATE:
-		fmt.Println("Create windows")
 		rc = DefWindowProc(hwnd, msg, wparam, lparam)
-		//appn = NewApplication(hwnd, backBuffer)
 	case WM_CLOSE:
 		Shutdown(gpToken)
 		DestroyWindow(hwnd)
-
 	case WM_COMMAND:
 		switch HANDLE(lparam) {
 		default:
@@ -160,10 +177,8 @@ func WndProc(hwnd HANDLE, msg uint32, wparam, lparam uintptr) (rc uintptr) {
 	case WM_PAINT:
 		BitBlt(hostDC, 0, 0, Width, Height, bufferDC, 0, 0, SRCCOPY)
 		rc = DefWindowProc(hwnd, msg, wparam, lparam)
-
 	case WM_DESTROY:
 		PostQuitMessage(0)
-
 	case WM_MOUSEMOVE:
 		//appn.TrackMouseMoveEvent(int(LOWORD(lparam)), int(HIWORD(lparam)), easydraw.MButton(wparam))
 	case WM_LBUTTONDOWN, WM_RBUTTONDOWN:
@@ -227,7 +242,7 @@ func rungui() int {
 	wproc := syscall.NewCallback(WndProc)
 
 	// RegisterClassEx
-	wcname := syscall.StringToUTF16Ptr("myWindowClass")
+	wcname := syscall.StringToUTF16Ptr("my Window Class")
 	var wc Wndclassex
 	wc.Size = uint32(unsafe.Sizeof(wc))
 	wc.WndProc = wproc
@@ -252,17 +267,18 @@ func rungui() int {
 		Width+20, Height+40+25,
 		0, 0, mh, 0)
 
+	fmt.Printf("e %v\n", e)
 	if e != nil {
 		abortErrNo("CreateWindowEx", e)
 	}
 	fmt.Printf("main window handle is %x\n", wh)
 
+	// ShowWindow
+	ShowWindow(wh, SW_SHOWDEFAULT)
+
 	if e := UpdateWindow(wh); e != nil {
 		abortErrNo("UpdateWindow", e)
 	}
-
-	// ShowWindow
-	ShowWindow(wh, SW_SHOWDEFAULT)
 
 	graphics_example(wh)
 
@@ -283,7 +299,7 @@ func rungui() int {
 }
 
 func main() {
-	//FreeConsole()
+	//	FreeConsole()
 	rc := rungui()
 	os.Exit(rc)
 }
