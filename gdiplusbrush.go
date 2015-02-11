@@ -62,9 +62,7 @@ type SolidBrush struct {
 
 func NewSolidBrush(color Color) (*SolidBrush, error) {
 	sbrush := &SolidBrush{}
-	var brush *GpSolidFill
-	sbrush.setStatus(GdipCreateSolidFill(color.GetValue(), &brush))
-	sbrush.SetNativeBrush((*GpBrush)(brush))
+	sbrush.setStatus(GdipCreateSolidFill(color.GetValue(), &sbrush.Brush.nativeBrush))
 	return sbrush, sbrush.LastError
 }
 

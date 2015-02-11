@@ -1,8 +1,6 @@
 package main
 
 import (
-	//	"bytes"
-	//	"code.google.com/p/mahonia"
 	"fmt"
 	"log"
 	"os"
@@ -12,9 +10,9 @@ import (
 )
 
 import (
+	. "github.com/trygo/gdiplus"
 	. "github.com/trygo/winapi"
 	. "github.com/trygo/winapi/gdi"
-	. "trygo/gdiplus"
 )
 
 func abortf(format string, a ...interface{}) {
@@ -33,12 +31,6 @@ var (
 //var appn *Application
 
 const Width, Height = 600, 450
-
-func EditWndProc(hwnd HANDLE, msg uint32, wparam, lparam uintptr) (rc uintptr) {
-	println(hwnd, msg, wparam, lparam)
-
-	return DefWindowProc(hwnd, msg, wparam, lparam)
-}
 
 var (
 	hostDC   HDC
@@ -69,7 +61,6 @@ func graphics_example(hwnd HANDLE) {
 	}()
 
 	startupGdiplus()
-
 	hostDC = GetDC(hwnd)
 
 	// 创建双缓冲
@@ -128,6 +119,14 @@ func graphics_example(hwnd HANDLE) {
 	fmt.Println("DrawPath.status:", graphics.LastResult)
 	fmt.Println("DrawPath.err:", graphics.LastError)
 
+	font, _ := NewFont(family, 50, FontStyleBold|FontStyleItalic, UnitPixel)
+	fmt.Println("NewFont.status:", font.LastResult)
+	fmt.Println("NewFont.err:", font.LastError)
+	defer font.Close()
+	graphics.DrawString("测试", font, &RectF{10, 150, 0, 0}, nil, brush)
+	fmt.Println("DrawString.status:", graphics.LastResult)
+	fmt.Println("DrawString.err:", graphics.LastError)
+
 	appPath, _ := os.Getwd()
 	bitmap, _ := NewBitmap(appPath + "/penguins.jpg")
 	defer bitmap.Close()
@@ -149,6 +148,9 @@ func WndProc(hwnd HANDLE, msg uint32, wparam, lparam uintptr) (rc uintptr) {
 		fmt.Println("Create windows")
 		rc = DefWindowProc(hwnd, msg, wparam, lparam)
 		//appn = NewApplication(hwnd, backBuffer)
+	case WM_CLOSE:
+		Shutdown(gpToken)
+		DestroyWindow(hwnd)
 
 	case WM_COMMAND:
 		switch HANDLE(lparam) {
@@ -158,9 +160,7 @@ func WndProc(hwnd HANDLE, msg uint32, wparam, lparam uintptr) (rc uintptr) {
 	case WM_PAINT:
 		BitBlt(hostDC, 0, 0, Width, Height, bufferDC, 0, 0, SRCCOPY)
 		rc = DefWindowProc(hwnd, msg, wparam, lparam)
-	case WM_CLOSE:
-		Shutdown(gpToken)
-		DestroyWindow(hwnd)
+
 	case WM_DESTROY:
 		PostQuitMessage(0)
 
@@ -257,12 +257,12 @@ func rungui() int {
 	}
 	fmt.Printf("main window handle is %x\n", wh)
 
-	// ShowWindow
-	ShowWindow(wh, SW_SHOWDEFAULT)
-
 	if e := UpdateWindow(wh); e != nil {
 		abortErrNo("UpdateWindow", e)
 	}
+
+	// ShowWindow
+	ShowWindow(wh, SW_SHOWDEFAULT)
 
 	graphics_example(wh)
 

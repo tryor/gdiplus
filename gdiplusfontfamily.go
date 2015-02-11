@@ -20,10 +20,6 @@ type FontFamily struct {
 	nativeFamily *GpFontFamily
 }
 
-//func NewFontFamily2() (*FontFamily, error) {
-//	return &FontFamily{GdiplusBase: GdiplusBase{LastResult: Ok}}, nil
-//}
-
 func NewFontFamily(name string, fontCollection IFontCollection) (*FontFamily, error) {
 	var nativeFontCollection *GpFontCollection
 	if fontCollection != nil {

@@ -422,7 +422,7 @@ const (
 //      Bold = 1
 //      Italic = 2
 //      BoldItalic = 3
-type FontStyle int
+type FontStyle INT
 
 const (
 	FontStyleRegular    FontStyle = 0

@@ -1073,7 +1073,7 @@ func GdipGetPenMiterLimit(pen *GpPen, miterLimit *REAL) (status Status, err erro
 func GdipSetPenMiterLimit(pen *GpPen, miterLimit REAL) (status Status, err error) {
 	return gdiplusSyscall(procGdipSetPenMiterLimit,
 		uintptr(unsafe.Pointer(pen)),
-		uintptr(miterLimit))
+		REALbits(miterLimit))
 }
 
 func GdipGetPenCustomEndCap(pen *GpPen, customCap **GpCustomLineCap) (status Status, err error) {
@@ -2172,21 +2172,21 @@ func GdipSetTextureWrapMode(texture *GpBrush, wrapMode WrapMode) (status Status,
 func GdipRotateTextureTransform(texture *GpBrush, angle REAL, order MatrixOrder) (status Status, err error) {
 	return gdiplusSyscall(procGdipRotateTextureTransform,
 		uintptr(unsafe.Pointer(texture)),
-		uintptr(angle),
+		REALbits(angle),
 		uintptr(order))
 }
 
 func GdipScaleTextureTransform(texture *GpBrush, sx, sy REAL, order MatrixOrder) (status Status, err error) {
 	return gdiplusSyscall(procGdipScaleTextureTransform,
 		uintptr(unsafe.Pointer(texture)),
-		uintptr(sx), uintptr(sy),
+		REALbits(sx), REALbits(sy),
 		uintptr(order))
 }
 
 func GdipTranslateTextureTransform(texture *GpBrush, dx, dy REAL, order MatrixOrder) (status Status, err error) {
 	return gdiplusSyscall(procGdipTranslateTextureTransform,
 		uintptr(unsafe.Pointer(texture)),
-		uintptr(dx), uintptr(dy),
+		REALbits(dx), REALbits(dy),
 		uintptr(order))
 }
 
@@ -2264,7 +2264,7 @@ func GdipCreateTexture(image *GpImage, wrapmode WrapMode, texture **GpBrush) (st
 func GdipBitmapSetResolution(bitmap *GpImage, xdpi, ydpi REAL) (status Status, err error) {
 	return gdiplusSyscall(procGdipBitmapSetResolution,
 		uintptr(unsafe.Pointer(bitmap)),
-		uintptr(xdpi), uintptr(ydpi))
+		REALbits(xdpi), REALbits(ydpi))
 }
 
 func GdipBitmapGetHistogramSize(format HistogramFormat, numberOfEntries *UINT) (status Status, err error) {
@@ -4275,7 +4275,7 @@ func GdipDeleteFont(font *GpFont) (status Status, err error) {
 }
 
 func GdipCreateFont(fontFamily *GpFontFamily, emSize REAL, style FontStyle, unit Unit, font **GpFont) (status Status, err error) {
-	return gdiplusSyscall(procGdipCreateFont, uintptr(unsafe.Pointer(fontFamily)), uintptr(emSize), uintptr(style), uintptr(unit), uintptr(unsafe.Pointer(font)))
+	return gdiplusSyscall(procGdipCreateFont, uintptr(unsafe.Pointer(fontFamily)), REALbits(emSize), uintptr(style), uintptr(unit), uintptr(unsafe.Pointer(font)))
 }
 
 func GdipDrawString(graphics *GpGraphics, text string, font *GpFont, layoutRect *RectF, format *GpStringFormat, brush *GpBrush) (status Status, err error) {
@@ -4590,7 +4590,7 @@ func GdipGetSolidFillColor(brush *GpSolidFill, color *ARGB) (status Status, err 
 	return gdiplusSyscall(procGdipGetSolidFillColor, uintptr(unsafe.Pointer(brush)), uintptr(unsafe.Pointer(color)))
 }
 
-func GdipCreateSolidFill(color ARGB, brush **GpSolidFill) (status Status, err error) {
+func GdipCreateSolidFill(color ARGB, brush **GpBrush) (status Status, err error) {
 	return gdiplusSyscall(procGdipCreateSolidFill, uintptr(color), uintptr(unsafe.Pointer(brush)))
 }
 
@@ -4605,11 +4605,6 @@ func GdipCloneBrush(brush *GpBrush, cloneBrush **GpBrush) (status Status, err er
 func GdipGetBrushType(brush *GpBrush, typ *GpBrushType) (status Status, err error) {
 	return gdiplusSyscall(procGdipGetBrushType, uintptr(unsafe.Pointer(brush)), uintptr(unsafe.Pointer(typ)))
 }
-
-//func SetDouble(x REAL, y REAL) (ret float64, err error) {
-//	rs, _, e := syscall.Syscall(procSetDouble, 2, uintptr(math.Float32bits(float32(x))), uintptr(math.Float32bits(float32(y))), 0)
-//	return float64(rs), error(e)
-//}
 
 func GdipDrawRectangle(graphics *GpGraphics, pen *GpPen, x, y, width, height REAL) (status Status, err error) {
 	return gdiplusSyscall(procGdipDrawRectangle, uintptr(unsafe.Pointer(graphics)), uintptr(unsafe.Pointer(pen)), REALbits(x), REALbits(y), REALbits(width), REALbits(height))
