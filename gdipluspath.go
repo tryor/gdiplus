@@ -68,7 +68,7 @@ func NewGraphicsPath2I(points []Point, types []byte,
 	return path, path.LastError
 }
 
-func (this *GraphicsPath) Close() {
+func (this *GraphicsPath) Release() {
 	if this.nativePath != nil {
 		GdipDeletePath(this.nativePath)
 	}
@@ -647,7 +647,7 @@ func NewGraphicsPathIterator(path *GraphicsPath) (*GraphicsPathIterator, error) 
 	return iter, iter.LastError
 }
 
-func (this *GraphicsPathIterator) Close() {
+func (this *GraphicsPathIterator) Release() {
 	if this.nativeIterator != nil {
 		GdipDeletePathIter(this.nativeIterator)
 	}

@@ -176,11 +176,7 @@ func NewEffect(guid *GUID) (*Effect, error) {
 	return effect, effect.LastError
 }
 
-func (this *Effect) Close() {
-	// pvData is allocated by ApplyEffect. Return the pointer so that
-	// it can be freed by the appropriate memory manager.
-	//DllExports::GdipFree(auxData);
-	// Release the native Effect.
+func (this *Effect) Release() {
 	if this.nativeEffect != nil {
 		GdipDeleteEffect(this.nativeEffect)
 	}
@@ -251,7 +247,7 @@ func (this *Blur) SetParameters(parameters *BlurParams) Status {
 /*
 Usage:
 	blur, _ := gdiplus.NewBlur()
-	defer blur.Close()
+	defer blur.Release()
 	var bpsize UINT
 	blur.GetParameterSize(&bpsize)
 	blurbuffer := make([]byte, bpsize)

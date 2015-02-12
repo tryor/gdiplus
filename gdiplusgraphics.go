@@ -55,7 +55,7 @@ func NewGraphicsFromImage(image IImage) (*Graphics, error) {
 	return &Graphics{nativeGraphics: gpg, GdiplusBase: GdiplusBase{LastResult: Status(lastResult), LastError: err}}, err
 }
 
-func (this *Graphics) Close() {
+func (this *Graphics) Release() {
 	if this.nativeGraphics != nil {
 		GdipDeleteGraphics(this.nativeGraphics)
 	}

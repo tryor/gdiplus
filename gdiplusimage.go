@@ -24,7 +24,7 @@ func NewImage(filename string, useEmbeddedColorManagement ...BOOL) (*Image, erro
 	return image, image.LastError
 }
 
-func (this *Image) Close() {
+func (this *Image) Release() {
 	if this.nativeImage != nil {
 		GdipDisposeImage(this.nativeImage)
 	}

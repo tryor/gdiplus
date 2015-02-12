@@ -11,7 +11,7 @@ type Font struct {
 	nativeFont *GpFont
 }
 
-func (this *Font) Close() {
+func (this *Font) Release() {
 	if this.nativeFont != nil {
 		this.setStatus(GdipDeleteFont(this.nativeFont))
 	}

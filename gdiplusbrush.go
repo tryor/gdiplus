@@ -8,7 +8,7 @@ type IBrush interface {
 	GetNativeBrush() *GpBrush
 	SetNativeBrush(nativeBrush *GpBrush, status ...Status)
 	GetType() BrushType
-	Close()
+	Release()
 }
 
 type Brush struct {
@@ -20,7 +20,7 @@ func newBrush() *Brush {
 	return &Brush{GdiplusBase: GdiplusBase{LastResult: NotImplemented}}
 }
 
-func (this *Brush) Close() {
+func (this *Brush) Release() {
 	if this.nativeBrush != nil {
 		GdipDeleteBrush(this.nativeBrush)
 	}

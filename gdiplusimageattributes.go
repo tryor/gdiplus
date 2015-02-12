@@ -15,7 +15,7 @@ func NewImageAttributes() (*ImageAttributes, error) {
 	return imageattr, imageattr.LastError
 }
 
-func (this *ImageAttributes) Close() {
+func (this *ImageAttributes) Release() {
 	if this.nativeImageAttr != nil {
 		GdipDisposeImageAttributes(this.nativeImageAttr)
 	}

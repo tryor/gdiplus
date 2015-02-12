@@ -25,7 +25,7 @@ func abortErrNo(funcname string, err error) {
 }
 
 var (
-	mh HANDLE
+	mh HWND
 )
 
 //var appn *Application
@@ -47,7 +47,7 @@ func startupGdiplus() {
 }
 
 ////appn = NewApplication(hwnd, backBuffer)
-func graphics_example(hwnd HANDLE) {
+func graphics_example(hwnd HWND) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("Runtime error caught: %v\n", r)
@@ -65,14 +65,14 @@ func graphics_example(hwnd HANDLE) {
 	hostDC = GetDC(hwnd)
 
 	// 创建双缓冲
-	bufferDC = CreateCompatibleDC(HANDLE(hostDC))
+	bufferDC = CreateCompatibleDC(HWND(hostDC))
 	hbitmap = CreateCompatibleBitmap(hostDC, Width, Height)
 	SelectObject(bufferDC, hbitmap)
 	DeleteObject(hbitmap)
 
 	var err error
 	graphics, err = FromHDC(bufferDC)
-	defer graphics.Close()
+	defer graphics.Release()
 	fmt.Println("FromHDC.graphics:", graphics)
 	fmt.Println("FromHDC.status:", graphics.LastResult)
 	fmt.Println("FromHDC.err:", err)
@@ -84,21 +84,21 @@ func graphics_example(hwnd HANDLE) {
 	graphics.Clear(Color{Olive})
 
 	pen, err := NewPen(Color{Argb: Red}, 3)
-	defer pen.Close()
+	defer pen.Release()
 	fmt.Println("NewPen.err:", err)
 	if err != nil {
 		return
 	}
 
 	brush, err := NewSolidBrush(NewColor3(255, 200, 200, 100))
-	defer brush.Close()
+	defer brush.Release()
 	fmt.Println("NewSolidBrush.brush:", brush)
 	if err != nil {
 		return
 	}
 
 	gpath, _ := NewGraphicsPath()
-	defer gpath.Close()
+	defer gpath.Release()
 	fmt.Println("gpath.status:", gpath.LastResult)
 	fmt.Println("gpath.err:", gpath.LastError)
 
@@ -107,7 +107,7 @@ func graphics_example(hwnd HANDLE) {
 	fmt.Println("gpath.AddRectangle.err:", gpath.LastError)
 
 	family, _ := NewFontFamily("宋体", nil) //"Courier New"
-	defer family.Close()
+	defer family.Release()
 	gpath.AddString("测试", family, FontStyleBold|FontStyleItalic, 80, &RectF{25, 25, 0.0, 0.0}, nil)
 	fmt.Println("gpath.AddString.status:", gpath.LastResult)
 	fmt.Println("gpath.AddString.err:", gpath.LastError)
@@ -123,7 +123,7 @@ func graphics_example(hwnd HANDLE) {
 	font, _ := NewFont(family, 50, FontStyleBold|FontStyleItalic, UnitPixel)
 	fmt.Println("NewFont.status:", font.LastResult)
 	fmt.Println("NewFont.err:", font.LastError)
-	defer font.Close()
+	defer font.Release()
 
 	rect := &RectF{10, 150, 0, 0}
 	rect, codepointsFitted, linesFilled, _ := graphics.MeasureString("测试", font, rect, nil)
@@ -140,7 +140,7 @@ func graphics_example(hwnd HANDLE) {
 
 	appPath, _ := os.Getwd()
 	bitmap, _ := NewBitmap(appPath + "/penguins.jpg")
-	defer bitmap.Close()
+	defer bitmap.Release()
 	fmt.Println("NewBitmap.status:", bitmap.LastResult)
 	fmt.Println("NewBitmap.err:", bitmap.LastError)
 	fmt.Println("NewBitmap.bitmap:", bitmap)
@@ -156,27 +156,22 @@ func graphics_example(hwnd HANDLE) {
 	BitBlt(hostDC, 0, 0, Width, Height, bufferDC, 0, 0, SRCCOPY)
 }
 
-func WndProc_(hwnd HANDLE, msg uint32, wparam, lparam uintptr) (rc uintptr) {
-	rc = DefWindowProc(hwnd, msg, wparam, lparam)
-	return
-}
-
 // WinProc called by windows to notify us of all windows events we might be interested in.
-func WndProc(hwnd HANDLE, msg uint32, wparam, lparam uintptr) (rc uintptr) {
+func WndProc(hwnd HWND, msg UINT, wparam WPARAM, lparam LPARAM) (rc uintptr) {
 	switch msg {
 	case WM_CREATE:
-		rc = DefWindowProc(hwnd, msg, wparam, lparam)
+		rc = DefWindowProcW(hwnd, msg, wparam, lparam)
 	case WM_CLOSE:
 		Shutdown(gpToken)
 		DestroyWindow(hwnd)
 	case WM_COMMAND:
 		switch HANDLE(lparam) {
 		default:
-			rc = DefWindowProc(hwnd, msg, wparam, lparam)
+			rc = DefWindowProcW(hwnd, msg, wparam, lparam)
 		}
 	case WM_PAINT:
 		BitBlt(hostDC, 0, 0, Width, Height, bufferDC, 0, 0, SRCCOPY)
-		rc = DefWindowProc(hwnd, msg, wparam, lparam)
+		rc = DefWindowProcW(hwnd, msg, wparam, lparam)
 	case WM_DESTROY:
 		PostQuitMessage(0)
 	case WM_MOUSEMOVE:
@@ -191,9 +186,9 @@ func WndProc(hwnd HANDLE, msg uint32, wparam, lparam uintptr) (rc uintptr) {
 		//if appn.SetCursor() {
 		//	return
 		//} else {
-		//	return DefWindowProc(hwnd, msg, wparam, lparam)
+		//	return DefWindowProcW(hwnd, msg, wparam, lparam)
 		//}
-		return DefWindowProc(hwnd, msg, wparam, lparam)
+		return DefWindowProcW(hwnd, msg, wparam, lparam)
 	case WM_KEYDOWN:
 		//appn.TrackKeyPressEvent(int(wparam))
 	case WM_KEYUP:
@@ -212,7 +207,7 @@ func WndProc(hwnd HANDLE, msg uint32, wparam, lparam uintptr) (rc uintptr) {
 		//appn.TrackKeyCharEvent(c)
 
 	default:
-		rc = DefWindowProc(hwnd, msg, wparam, lparam)
+		rc = DefWindowProcW(hwnd, msg, wparam, lparam)
 	}
 	return
 }
@@ -221,7 +216,7 @@ func rungui() int {
 	var e error
 
 	// GetModuleHandle
-	mh, e = GetModuleHandle(nil)
+	mh, e = GetModuleHandle("")
 	if e != nil {
 		abortErrNo("GetModuleHandle", e)
 	}
@@ -242,30 +237,30 @@ func rungui() int {
 	wproc := syscall.NewCallback(WndProc)
 
 	// RegisterClassEx
-	wcname := syscall.StringToUTF16Ptr("my Window Class")
+	wcname := "my Window Class" //syscall.StringToUTF16Ptr(wcname)
 	var wc Wndclassex
 	wc.Size = uint32(unsafe.Sizeof(wc))
 	wc.WndProc = wproc
-	wc.Instance = mh
+	wc.Instance = HINSTANCE(mh)
 	wc.Icon = myicon
 	wc.Cursor = mycursor
 	wc.Background = COLOR_BTNFACE + 1
 	wc.MenuName = nil
-	wc.ClassName = wcname
+	wc.ClassName = syscall.StringToUTF16Ptr(wcname)
 	wc.IconSm = myicon
-	if _, e := RegisterClassEx(&wc); e != nil {
+	if _, e := RegisterClassExW(&wc); e != nil {
 		abortErrNo("RegisterClassEx", e)
 	}
 
 	// CreateWindowEx
-	wh, e := CreateWindowEx(
+	wh, e := CreateWindowExW(
 		WS_EX_CLIENTEDGE,
 		wcname,
-		syscall.StringToUTF16Ptr("My window"),
+		"My window",
 		WS_OVERLAPPEDWINDOW|WS_VISIBLE,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		Width+20, Height+40+25,
-		0, 0, mh, 0)
+		0, 0, HINSTANCE(mh), 0)
 
 	fmt.Printf("e %v\n", e)
 	if e != nil {
@@ -293,7 +288,7 @@ func rungui() int {
 			break
 		}
 		TranslateMessage(&m)
-		DispatchMessage(&m)
+		DispatchMessageW(&m)
 	}
 	return int(m.Wparam)
 }

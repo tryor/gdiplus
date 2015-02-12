@@ -15,7 +15,7 @@ func NewMatrix() (*Matrix, error) {
 	return matrix, matrix.LastError
 }
 
-func (this *Matrix) Close() {
+func (this *Matrix) Release() {
 	if this.nativeMatrix != nil {
 		GdipDeleteMatrix(this.nativeMatrix)
 	}

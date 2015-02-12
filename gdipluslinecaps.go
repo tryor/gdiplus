@@ -42,7 +42,7 @@ func (this *CustomLineCap) GetNativeCap() *GpCustomLineCap {
 	return this.nativeCap
 }
 
-func (this *CustomLineCap) Close() {
+func (this *CustomLineCap) Release() {
 	if this.nativeCap != nil {
 		GdipDeleteCustomLineCap(this.nativeCap)
 	}

@@ -37,7 +37,7 @@ func NewStringFormat3(strfmt *StringFormat) (*StringFormat, error) {
 	return format, format.LastError
 }
 
-func (this *StringFormat) Close() {
+func (this *StringFormat) Release() {
 	if this.nativeFormat != nil {
 		this.setStatus(GdipDeleteStringFormat(this.nativeFormat))
 	}

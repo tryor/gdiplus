@@ -8,7 +8,7 @@ type IFontCollection interface {
 	GetNativeFontCollection() *GpFontCollection
 	GetFamilyCount() (numFound INT)
 	GetFamilies(numSought INT, gpfamilies []*FontFamily) Status
-	Close()
+	Release()
 }
 
 type FontCollection struct {
@@ -20,7 +20,7 @@ func (this *FontCollection) GetNativeFontCollection() *GpFontCollection {
 	return this.nativeFontCollection
 }
 
-func (this *FontCollection) Close() {
+func (this *FontCollection) Release() {
 }
 
 func (this *FontCollection) GetFamilyCount() (numFound INT) {
@@ -62,7 +62,7 @@ func NewInstalledFontCollection() (*InstalledFontCollection, error) {
 	return fc, fc.LastError
 }
 
-func (this *InstalledFontCollection) Close() {
+func (this *InstalledFontCollection) Release() {
 }
 
 type PrivateFontCollection struct {
@@ -75,7 +75,7 @@ func NewPrivateFontCollection() (*PrivateFontCollection, error) {
 	return fc, fc.LastError
 }
 
-func (this *PrivateFontCollection) Close() {
+func (this *PrivateFontCollection) Release() {
 	if this.nativeFontCollection != nil {
 		GdipDeletePrivateFontCollection(&this.nativeFontCollection)
 	}
