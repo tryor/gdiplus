@@ -17,7 +17,8 @@ func NewMatrix() (*Matrix, error) {
 
 func (this *Matrix) Release() {
 	if this.nativeMatrix != nil {
-		GdipDeleteMatrix(this.nativeMatrix)
+		this.setStatus(GdipDeleteMatrix(this.nativeMatrix))
+		this.nativeMatrix = nil
 	}
 }
 

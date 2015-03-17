@@ -77,7 +77,8 @@ func NewPrivateFontCollection() (*PrivateFontCollection, error) {
 
 func (this *PrivateFontCollection) Release() {
 	if this.nativeFontCollection != nil {
-		GdipDeletePrivateFontCollection(&this.nativeFontCollection)
+		this.setStatus(GdipDeletePrivateFontCollection(&this.nativeFontCollection))
+		this.nativeFontCollection = nil
 	}
 }
 

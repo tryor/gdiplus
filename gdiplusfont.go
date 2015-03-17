@@ -14,6 +14,7 @@ type Font struct {
 func (this *Font) Release() {
 	if this.nativeFont != nil {
 		this.setStatus(GdipDeleteFont(this.nativeFont))
+		this.nativeFont = nil
 	}
 }
 
@@ -34,6 +35,7 @@ func NewFont2(familyName string, emSize REAL, style FontStyle, unit Unit, fontCo
 
 	font := &Font{}
 	family, _ := NewFontFamily(familyName, fontCollection)
+	defer family.Release()
 	//nativeFamily := family.nativeFamily
 	var nativeFamily *GpFontFamily
 	if family != nil {

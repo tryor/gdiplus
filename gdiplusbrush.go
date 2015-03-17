@@ -22,7 +22,8 @@ func newBrush() *Brush {
 
 func (this *Brush) Release() {
 	if this.nativeBrush != nil {
-		GdipDeleteBrush(this.nativeBrush)
+		this.setStatus(GdipDeleteBrush(this.nativeBrush))
+		this.nativeBrush = nil
 	}
 }
 

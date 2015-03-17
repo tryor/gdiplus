@@ -39,7 +39,8 @@ func NewPen2(brush IBrush, width ...REAL) (*Pen, error) {
 
 func (this *Pen) Release() {
 	if this.nativePen != nil {
-		GdipDeletePen(this.nativePen)
+		this.setStatus(GdipDeletePen(this.nativePen))
+		this.nativePen = nil
 	}
 }
 

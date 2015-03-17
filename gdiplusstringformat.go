@@ -40,6 +40,7 @@ func NewStringFormat3(strfmt *StringFormat) (*StringFormat, error) {
 func (this *StringFormat) Release() {
 	if this.nativeFormat != nil {
 		this.setStatus(GdipDeleteStringFormat(this.nativeFormat))
+		this.nativeFormat = nil
 	}
 }
 
@@ -53,6 +54,7 @@ func (this *StringFormat) Clone() *StringFormat {
 	return nil
 }
 
+//StringFormatFlags
 func (this *StringFormat) SetFormatFlags(flags INT) Status {
 	return this.setStatus(GdipSetStringFormatFlags(
 		this.nativeFormat,

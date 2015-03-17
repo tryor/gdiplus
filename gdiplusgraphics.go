@@ -57,7 +57,8 @@ func NewGraphicsFromImage(image IImage) (*Graphics, error) {
 
 func (this *Graphics) Release() {
 	if this.nativeGraphics != nil {
-		GdipDeleteGraphics(this.nativeGraphics)
+		this.setStatus(GdipDeleteGraphics(this.nativeGraphics))
+		this.nativeGraphics = nil
 	}
 }
 

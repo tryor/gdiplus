@@ -153,6 +153,11 @@ func graphics_example(hwnd HWND) {
 	fmt.Println("DrawDriverString.status:", graphics.LastResult)
 	fmt.Println("DrawDriverString.err:", graphics.LastError)
 
+	layerCanvas, _ := NewBitmap3(100, 200, PixelFormat32bppARGB)
+	fmt.Println("NewBitmap3.status:", layerCanvas.LastResult)
+	fmt.Println("NewBitmap3.err:", layerCanvas.LastError)
+	fmt.Println("NewBitmap3.bitmap:", layerCanvas)
+
 	BitBlt(hostDC, 0, 0, Width, Height, bufferDC, 0, 0, SRCCOPY)
 }
 

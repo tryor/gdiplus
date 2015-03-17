@@ -13,6 +13,7 @@ func NewCachedBitmap(bitmap *Bitmap, graphics *Graphics) (*CachedBitmap, error) 
 
 func (this *CachedBitmap) Release() {
 	if this.nativeCachedBitmap != nil {
-		GdipDeleteCachedBitmap(this.nativeCachedBitmap)
+		this.setStatus(GdipDeleteCachedBitmap(this.nativeCachedBitmap))
+		this.nativeCachedBitmap = nil
 	}
 }

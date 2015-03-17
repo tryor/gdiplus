@@ -44,7 +44,8 @@ func (this *CustomLineCap) GetNativeCap() *GpCustomLineCap {
 
 func (this *CustomLineCap) Release() {
 	if this.nativeCap != nil {
-		GdipDeleteCustomLineCap(this.nativeCap)
+		this.setStatus(GdipDeleteCustomLineCap(this.nativeCap))
+		this.nativeCap = nil
 	}
 }
 

@@ -70,7 +70,8 @@ func NewGraphicsPath2I(points []Point, types []byte,
 
 func (this *GraphicsPath) Release() {
 	if this.nativePath != nil {
-		GdipDeletePath(this.nativePath)
+		this.setStatus(GdipDeletePath(this.nativePath))
+		this.nativePath = nil
 	}
 }
 
@@ -649,7 +650,8 @@ func NewGraphicsPathIterator(path *GraphicsPath) (*GraphicsPathIterator, error) 
 
 func (this *GraphicsPathIterator) Release() {
 	if this.nativeIterator != nil {
-		GdipDeletePathIter(this.nativeIterator)
+		this.setStatus(GdipDeletePathIter(this.nativeIterator))
+		this.nativeIterator = nil
 	}
 }
 

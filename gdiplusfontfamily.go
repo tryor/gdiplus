@@ -35,6 +35,7 @@ func NewFontFamily(name string, fontCollection IFontCollection) (*FontFamily, er
 func (this *FontFamily) Release() {
 	if this.nativeFamily != nil {
 		this.setStatus(GdipDeleteFontFamily(this.nativeFamily))
+		this.nativeFamily = nil
 	}
 }
 

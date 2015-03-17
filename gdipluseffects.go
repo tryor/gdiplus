@@ -178,7 +178,8 @@ func NewEffect(guid *GUID) (*Effect, error) {
 
 func (this *Effect) Release() {
 	if this.nativeEffect != nil {
-		GdipDeleteEffect(this.nativeEffect)
+		this.setStatus(GdipDeleteEffect(this.nativeEffect))
+		this.nativeEffect = nil
 	}
 }
 

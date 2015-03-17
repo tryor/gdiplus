@@ -17,9 +17,10 @@ func NewRegion() (*Region, error) {
 	return region, region.LastError
 }
 
-func (this *Region) Close() {
+func (this *Region) Release() {
 	if this.nativeRegion != nil {
-		GdipDeleteRegion(this.nativeRegion)
+		this.setStatus(GdipDeleteRegion(this.nativeRegion))
+		this.nativeRegion = nil
 	}
 }
 
