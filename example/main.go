@@ -13,6 +13,7 @@ import (
 	. "github.com/trygo/gdiplus"
 	. "github.com/trygo/winapi"
 	. "github.com/trygo/winapi/gdi"
+	//	. "trygo/gdiplus"
 )
 
 func abortf(format string, a ...interface{}) {
@@ -33,17 +34,118 @@ var (
 const Width, Height = 600, 450
 
 var (
-	hostDC   HDC
-	bufferDC HDC
-	hbitmap  HANDLE
-	graphics *Graphics
-	gpToken  ULONG_PTR
+	hostDC      HDC
+	bufferDC    HDC
+	hbitmap     HANDLE
+	bitmapLayer *Bitmap
+	graphics    *Graphics
+	gpToken     ULONG_PTR
+
+	hostGraphics *Graphics
 )
 
 func startupGdiplus() {
 	status, err := Startup(&gpToken, nil, nil)
 	fmt.Println("Startup.status:", status)
 	fmt.Println("Startup.err:", err)
+}
+
+var paths []*GraphicsPath
+
+func drawShape(mx, my int) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Runtime error caught: %v\n", r)
+			for i := 1; ; i += 1 {
+				_, file, line, ok := runtime.Caller(i)
+				if !ok {
+					break
+				}
+				log.Print(file, line)
+			}
+		}
+	}()
+
+	for i := 0; i < 1; i++ {
+		drawShapeA(mx+i, my+i)
+	}
+
+	hostGraphics.DrawImageI3(bitmapLayer, 0, 0, INT(bitmapLayer.GetWidth()), INT(bitmapLayer.GetHeight()))
+
+	BitBlt(hostDC, 0, 0, Width, Height, bufferDC, 0, 0, SRCCOPY)
+}
+
+func drawShapeA(mx, my int) {
+	pen, err := NewPen(Color{Argb: Red}, 3)
+	defer pen.Release()
+	if err != nil {
+		fmt.Println("NewPen.err:", err)
+		return
+	}
+
+	brush, err := NewSolidBrush(NewColor3(255, 200, 200, 100))
+	defer brush.Release()
+	if err != nil {
+		fmt.Println("NewSolidBrush.err:", err)
+		return
+	}
+
+	fontbrush, err := NewSolidBrush(NewColor3(255, 200, 0, 100))
+	defer fontbrush.Release()
+	if err != nil {
+		fmt.Println("NewSolidBrush.err:", err)
+		return
+	}
+
+	path, err := NewGraphicsPath()
+	if err != nil {
+		fmt.Println("NewGraphicsPath.err:", err)
+		return
+	}
+
+	rect := &RectF{REAL(mx), REAL(my), 100, 30}
+	path.AddRectangle(rect)
+
+	paths = append(paths, path)
+
+	graphics.FillPath(brush, path)
+	if graphics.LastResult != Ok {
+		fmt.Println("graphics.FillPath.err:", err, graphics.LastResult)
+	}
+	graphics.DrawPath(pen, path)
+	if graphics.LastResult != Ok {
+		fmt.Println("graphics.DrawPath.err:", err, graphics.LastResult)
+	}
+
+	path.IsVisible(REAL(mx), REAL(my), graphics)
+	if path.LastResult != Ok {
+		fmt.Println("path.IsVisible.err:", path.LastResult)
+	}
+
+	path.IsOutlineVisible(REAL(mx), REAL(my), pen, graphics)
+	if path.LastResult != Ok {
+		fmt.Println("path.IsOutlineVisible.err:", path.LastResult)
+	}
+
+	path.Reset()
+	if path.LastResult != Ok {
+		fmt.Println("path.Reset.err:", path.LastResult)
+	}
+
+	//family, _ := NewFontFamily("Arial", nil)
+	//defer family.Release()
+	//font, _ := NewFont(family, 15, FontStyleRegular, UnitPixel)
+	//defer font.Release()
+
+	//familyName string, emSize REAL, style FontStyle, unit Unit, fontCollection IFontCollection
+	font, _ := NewFont2("Arial", 15, FontStyleRegular, UnitPixel, nil)
+	defer font.Release()
+	fmt.Println("NewFont2.err:", font.LastResult)
+	fmt.Println("NewFont2.font:", font)
+
+	text := fmt.Sprintf("test:%v,%v", 2, 3)
+	graphics.DrawString(text, font, rect, nil, fontbrush)
+
 }
 
 ////appn = NewApplication(hwnd, backBuffer)
@@ -62,6 +164,9 @@ func graphics_example(hwnd HWND) {
 	}()
 
 	startupGdiplus()
+
+	paths = make([]*GraphicsPath, 0)
+
 	hostDC = GetDC(hwnd)
 
 	// 创建双缓冲
@@ -71,16 +176,31 @@ func graphics_example(hwnd HWND) {
 	DeleteObject(hbitmap)
 
 	var err error
-	graphics, err = FromHDC(bufferDC)
-	defer graphics.Release()
-	fmt.Println("FromHDC.graphics:", graphics)
-	fmt.Println("FromHDC.status:", graphics.LastResult)
+	hostGraphics, err = FromHDC(bufferDC)
+	//	defer graphics.Release()
+	fmt.Println("FromHDC.hostGraphics:", hostGraphics)
+	fmt.Println("FromHDC.status:", hostGraphics.LastResult)
 	fmt.Println("FromHDC.err:", err)
 
+	hostGraphics.SetPageUnit(UnitPixel)
+	hostGraphics.SetSmoothingMode(SmoothingModeHighQuality)
+	hostGraphics.SetTextRenderingHint(TextRenderingHintClearTypeGridFit)
+	//hostGraphics.SetTextRenderingHint(TextRenderingHintAntiAlias)
+	hostGraphics.Clear(Color{Olive})
+
+	bitmapLayer, _ = NewBitmap3(1000, 1000, PixelFormat32bppARGB)
+	if bitmapLayer.LastError != nil {
+		fmt.Println("NewBitmap3.err:", bitmapLayer.LastError)
+		return
+	}
+	graphics, _ = FromImage(bitmapLayer)
+	if graphics.LastError != nil {
+		fmt.Println("FromImage.err:", graphics.LastError)
+		return
+	}
 	graphics.SetPageUnit(UnitPixel)
 	graphics.SetSmoothingMode(SmoothingModeHighQuality)
 	graphics.SetTextRenderingHint(TextRenderingHintClearTypeGridFit)
-	//graphics.SetTextRenderingHint(TextRenderingHintAntiAlias)
 	graphics.Clear(Color{Olive})
 
 	pen, err := NewPen(Color{Argb: Red}, 3)
@@ -96,7 +216,7 @@ func graphics_example(hwnd HWND) {
 	if err != nil {
 		return
 	}
-
+	//	return
 	gpath, _ := NewGraphicsPath()
 	defer gpath.Release()
 	fmt.Println("gpath.status:", gpath.LastResult)
@@ -140,12 +260,17 @@ func graphics_example(hwnd HWND) {
 
 	appPath, _ := os.Getwd()
 	bitmap, _ := NewBitmap(appPath + "/penguins.jpg")
+	//	bitmap, _ := NewBitmap(appPath + "/i2_select.png")
 	defer bitmap.Release()
 	fmt.Println("NewBitmap.status:", bitmap.LastResult)
 	fmt.Println("NewBitmap.err:", bitmap.LastError)
 	fmt.Println("NewBitmap.bitmap:", bitmap)
 
-	graphics.DrawImageI4(bitmap, &Rect{200, 150, 200, 200})
+	//	graphics.DrawImageI(bitmap, 200, 150)
+	//		graphics.DrawImageI3(bitmap, 200, 150, INT(bitmap.GetWidth()), INT(bitmap.GetHeight()))
+	//	graphics.DrawImageI3(bitmap, 200, 150, 200, 200)
+	//graphics.DrawImageI6(bitmap, 200, 150, 0, 0, INT(bitmap.GetWidth()), INT(bitmap.GetHeight()), UnitPixel)
+	graphics.DrawImageI6(bitmap, 200, 150, 100, 100, 200, 200, UnitPixel)
 	fmt.Println("DrawImageI4.status:", graphics.LastResult)
 	fmt.Println("DrawImageI4.err:", graphics.LastError)
 
@@ -157,6 +282,15 @@ func graphics_example(hwnd HWND) {
 	fmt.Println("NewBitmap3.status:", layerCanvas.LastResult)
 	fmt.Println("NewBitmap3.err:", layerCanvas.LastError)
 	fmt.Println("NewBitmap3.bitmap:", layerCanvas)
+
+	points := []PointF{PointF{100, 100}, PointF{100, 200}, PointF{150, 280}, PointF{200, 300}, PointF{250, 200}, PointF{200, 130}, PointF{100, 100}}
+	graphics.DrawCurve(pen, points)
+	fmt.Println("DrawCurve.status:", graphics.LastResult)
+	fmt.Println("DrawCurve.err:", graphics.LastError)
+
+	//	graphics.DrawLines(pen, points)
+	//	fmt.Println("DrawLines.status:", graphics.LastResult)
+	//	fmt.Println("DrawLines.err:", graphics.LastError)
 
 	BitBlt(hostDC, 0, 0, Width, Height, bufferDC, 0, 0, SRCCOPY)
 }
@@ -182,6 +316,7 @@ func WndProc(hwnd HWND, msg UINT, wparam WPARAM, lparam LPARAM) (rc uintptr) {
 	case WM_MOUSEMOVE:
 		//appn.TrackMouseMoveEvent(int(LOWORD(lparam)), int(HIWORD(lparam)), easydraw.MButton(wparam))
 	case WM_LBUTTONDOWN, WM_RBUTTONDOWN:
+		drawShape(int(LOWORD(INT(lparam))), int(HIWORD(INT(lparam))))
 		//appn.TrackMousePressEvent(int(LOWORD(lparam)), int(HIWORD(lparam)), easydraw.MButton(wparam))
 	case WM_LBUTTONUP, WM_RBUTTONUP:
 		//appn.TrackMouseReleaseEvent(int(LOWORD(lparam)), int(HIWORD(lparam)), easydraw.MButton(wparam))
