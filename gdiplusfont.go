@@ -1,9 +1,10 @@
 package gdiplus
 
 import (
-	. "github.com/trygo/winapi"
-	. "github.com/trygo/winapi/gdi"
 	"unsafe"
+
+	. "github.com/tryor/winapi"
+	. "github.com/tryor/winapi/gdi"
 )
 
 type Font struct {

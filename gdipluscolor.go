@@ -1,8 +1,8 @@
 package gdiplus
 
 import (
-	. "github.com/trygo/winapi"
-	. "github.com/trygo/winapi/gdi"
+	. "github.com/tryor/winapi"
+	. "github.com/tryor/winapi/gdi"
 )
 
 //----------------------------------------------------------------------------

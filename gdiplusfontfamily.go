@@ -1,10 +1,11 @@
 package gdiplus
 
 import (
-	. "github.com/trygo/winapi"
-	. "github.com/trygo/winapi/gdi"
 	"syscall"
 	"unsafe"
+
+	. "github.com/tryor/winapi"
+	. "github.com/tryor/winapi/gdi"
 )
 
 var GenericSansSerifFontFamily *FontFamily

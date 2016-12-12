@@ -1,8 +1,9 @@
 package gdiplus
 
 import (
-	. "github.com/trygo/winapi"
 	"unsafe"
+
+	. "github.com/tryor/winapi"
 )
 
 //---------------------------------------------------------------------------

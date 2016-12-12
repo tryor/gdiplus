@@ -10,10 +10,9 @@ import (
 )
 
 import (
-	. "github.com/trygo/gdiplus"
-	. "github.com/trygo/winapi"
-	. "github.com/trygo/winapi/gdi"
-	//	. "trygo/gdiplus"
+	. "github.com/tryor/gdiplus"
+	. "github.com/tryor/winapi"
+	. "github.com/tryor/winapi/gdi"
 )
 
 func abortf(format string, a ...interface{}) {

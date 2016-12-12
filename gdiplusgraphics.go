@@ -2,7 +2,8 @@ package gdiplus
 
 import (
 	"errors"
-	. "github.com/trygo/winapi"
+
+	. "github.com/tryor/winapi"
 )
 
 type Graphics struct {

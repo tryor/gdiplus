@@ -1,7 +1,7 @@
 package gdiplus
 
 import (
-	. "github.com/trygo/winapi"
+	. "github.com/tryor/winapi"
 )
 
 // Used for debug event notification (debug builds only)

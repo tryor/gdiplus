@@ -8,7 +8,7 @@ gdiplus for windows
 ============
 To install:
 
-    go get -u github.com/trygo/gdiplus
+    go get -u github.com/tryor/gdiplus
 	
 	
 ## List

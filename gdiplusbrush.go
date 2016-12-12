@@ -1,7 +1,7 @@
 package gdiplus
 
 import (
-	. "github.com/trygo/winapi"
+	. "github.com/tryor/winapi"
 )
 
 type IBrush interface {

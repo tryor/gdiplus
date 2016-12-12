@@ -1,8 +1,9 @@
 package gdiplus
 
 import (
-	. "github.com/trygo/winapi"
 	"unsafe"
+
+	. "github.com/tryor/winapi"
 )
 
 //#if (GDIPVER >= 0x0110)
