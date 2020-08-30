@@ -30,22 +30,22 @@ type NotificationUnhookProc func(token ULONG_PTR)
 // Input structure for GdiplusStartup()
 
 type GdiplusStartupInput struct {
-	GdiplusVersion           UINT32         // Must be 1
-	DebugEventCallback       DebugEventProc // Ignored on free builds
-	SuppressBackgroundThread BOOL           // FALSE unless you're prepared to call
+	GdiplusVersion           UINT32  // Must be 1
+	DebugEventCallback       uintptr // Ignored on free builds
+	SuppressBackgroundThread uintptr // FALSE unless you're prepared to call
 	// the hook/unhook functions properly
-	SuppressExternalCodecs BOOL // FALSE unless you want GDI+ only to use
+	SuppressExternalCodecs uintptr // FALSE unless you want GDI+ only to use
 	// its internal image codecs.
 
 }
 
 func NewGdiplusStartupInput(
-	debugEventCallback DebugEventProc,
-	suppressBackgroundThread BOOL,
-	suppressExternalCodecs BOOL) *GdiplusStartupInput {
+	debugEventCallback uintptr, //syscall.NewCallback(DebugEventProc)
+	suppressBackgroundThread bool,
+	suppressExternalCodecs bool) *GdiplusStartupInput {
 	return &GdiplusStartupInput{GdiplusVersion: 1, DebugEventCallback: debugEventCallback,
-		SuppressBackgroundThread: suppressBackgroundThread,
-		SuppressExternalCodecs:   suppressExternalCodecs}
+		SuppressBackgroundThread: BoolToPtr(suppressBackgroundThread),
+		SuppressExternalCodecs:   BoolToPtr(suppressExternalCodecs)}
 }
 
 // Output structure for GdiplusStartup()
@@ -78,7 +78,7 @@ type GdiplusStartupOutput struct {
 
 func Startup(token *ULONG_PTR, input *GdiplusStartupInput, output *GdiplusStartupOutput) (Status, error) {
 	if input == nil {
-		input = NewGdiplusStartupInput(nil, false, false)
+		input = NewGdiplusStartupInput(0, false, false)
 	}
 	status, err := GdiplusStartup(token, input, output)
 	return Status(status), err
