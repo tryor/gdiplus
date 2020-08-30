@@ -25,7 +25,7 @@ func abortErrNo(funcname string, err error) {
 }
 
 var (
-	mh HWND
+	mh HINSTANCE
 )
 
 //var appn *Application
